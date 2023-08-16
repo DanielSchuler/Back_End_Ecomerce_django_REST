@@ -1,0 +1,236 @@
+-------------------------ProductDetailView-------------------------------------------------
+
+Endpoint: /product/{productId}/
+Methods: GET, PUT, DELETE
+
+Description:
+This view provides details for a specific product identified by the productId. It supports retrieving, updating, and deleting a product.
+
+GET Request:
+- Method: GET
+- Endpoint: /product/{productId}/
+- Response:
+    - Status code: 200 OK
+    - Body (JSON):
+        - product: Serialized product object
+
+PUT Request:
+- Method: PUT
+- Endpoint: /product/{productId}/
+- Request body (JSON): Updated product data
+- Response:
+    - Status code: 200 OK
+    - Body (JSON): Serialized updated product object
+
+DELETE Request:
+- Method: DELETE
+- Endpoint: /product/{productId}/
+- Response:
+    - Status code: 204 NO CONTENT
+
+Functionality:
+- get_product: Retrieves a product with the given product_id from the database.
+- validate_product_id: Validates the productId parameter and converts it to an integer if possible.
+- handle_invalid_product_id: Handles the case when the productId is not a valid integer.
+- handle_product_not_found: Handles the case when a product with the given productId does not exist.
+- GET method:
+    - Retrieves the product based on the productId.
+    - Serializes the product.
+    - Returns the serialized product in the response.
+- PUT method:
+    - Retrieves the product based on the productId.
+    - Updates the product with the data from the request body.
+    - Saves the updated product and returns the serialized updated product in the response.
+- DELETE method:
+    - Retrieves the product based on the productId.
+    - Deletes the product from the database.
+    - Returns a success message in the response.
+
+
+JSON for PUT
+
+{
+    "id": 2,
+    "thumbnail": "/photos/2023/07/play_station_2_ZrXXKXC.jpeg",
+    "name": "updated_play5",
+    "photo": "/photos/2023/07/play_station_2_ZrXXKXC.jpeg",
+    "description": "updated_play2 dec",
+    "price": "250.00",
+    "compare_price": "280.00",
+    "quantity": 5,
+    "sold": 2,
+    "date_created": "2023-07-06T21:54:26.917365Z",
+    "date_updated": "2023-08-08T16:25:46.789932Z",
+    "category": 1
+}
+
+-------------------------------listProductsView-----------------------------------
+
+Endpoint: /product/list/
+Method: GET
+
+Description:
+This view provides a paginated list of products. It supports filtering and ordering based on name and description fields.
+
+GET Request:
+- Method: GET
+- Endpoint: /product/list/
+- Response:
+    - Status code: 200 OK
+    - Body (JSON):
+        - Count: Total number of products
+        - Next: URL for the next page of results (if available)
+        - Previous: URL for the previous page of results (if available)
+        - Results: Array of serialized product objects
+
+Functionality:
+- queryset: The initial queryset for retrieving all products from the database.
+- filter_backends: Configures the filters to be applied to the queryset.
+- search_fields: Specifies the fields on which the search filter should be applied.
+- pagination_class: Configures the pagination settings for the view.
+- list method:
+    - Retrieves the queryset and paginates the results.
+    - Serializes the paginated products.
+    - Returns the paginated response in the body.
+    - If no page is specified, returns the first page of results.
+    - If there are no products, returns an error response indicating the absence of products.
+
+¡ COMO ES UN VIEW GET SI QUIERO BUSCAR TODOS LOS PRODUCTOS EN UNA PAGINA PONGO
+http://127.0.0.1:8000/product/list  o tambien http://127.0.0.1:8000/product/list/?p= el numero de la pagina que quiero
+
+
+------------------------------------List search view------------------------------------
+
+Endpoint: /product/search/
+Method: POST
+
+Description:
+This view handles the searching and filtering of products based on the provided search term and category ID.
+
+Request:
+- Method: POST
+- Headers: Content-Type: application/json
+- Body (JSON):
+    - category_id: (optional) The ID of the category to filter the products. Default: 0 (all categories)
+    - search: (optional) The search term to filter the products by name or description.
+
+Response:
+- Status code: 200 OK
+- Body (JSON):
+    - search_products: An array of serialized product objects matching the search and filter criteria.
+
+Functionality:
+1. Extracts the category ID and search term from the request data.
+2. Retrieves the initial queryset of products.
+3. Filters the queryset based on the provided search term.
+4. Applies category filters to further narrow down the queryset.
+5. Orders the queryset by date created in descending order.
+6. Serializes the filtered products.
+7. Returns the serialized products in the response body.
+
+¡CON POSTMAN USANDO POST Y JSON !
+EJEMPLO
+{
+  "category_id": 0,
+  "search": "play"
+}
+
+
+-------------------------------------list related view--------------------------------
+
+Endpoint: /product-related/{productId}/
+Method: GET
+
+Description:
+This view retrieves a list of related products based on the given productId. Related products are determined based on the category of the provided product, and the list is ordered by the number of units sold.
+
+GET Request:
+- Method: GET
+- Endpoint: /product-related/{productId}/
+- Response:
+    - Status code: 200 OK
+    - Body (JSON):
+        - related_products: Array of serialized related product objects
+
+Functionality:
+- get method:
+    - Retrieves the productId from the URL parameter.
+    - Fetches the corresponding product object from the database.
+    - Retrieves the category of the product.
+    - Retrieves related products based on the category.
+    - Excludes the current product from the list of related products.
+    - Orders the related products by the number of units sold.
+    - Serializes the related products.
+    - Returns the serialized related products in the response.
+    - Limits the number of related products to a maximum of 3 if available.
+    - If no related products are found, returns an error response indicating the absence of related products.
+
+
+
+----------------------------------- list by search view--------------------------------------
+
+
+Endpoint: /advanced-search/
+Method: POST
+
+Description:
+This view provides advanced search functionality for products based on the given search criteria. It allows filtering by category and price range, and supports searching by name and description. The search results can be ordered by date created, price, or units sold.
+
+POST Request:
+- Method: POST
+- Endpoint: /advanced-search/
+- Headers: Content-Type: application/json
+- Body (JSON):
+    - category_id: (optional) The ID of the category to filter the products. Default: 0 (all categories)
+    - price_range: (optional) The price range to filter the products. Available options: '1 - 19', '20 - 39', '40 - 59', '60 - 79', 'More than 80'
+    - search: (optional) The search term to filter the products by name or description.
+
+Response:
+- Status code: 200 OK
+- Body (JSON):
+    - Count: Total number of products matching the search criteria
+    - Next: URL for the next page of results (if available)
+    - Previous: URL for the previous page of results (if available)
+    - Results: Array of serialized product objects
+
+Functionality:
+- get_queryset: Retrieves the initial queryset containing all products.
+- Filters the queryset based on the provided category_id and price_range.
+- Performs search on the name and description fields based on the provided search term.
+- Returns the filtered and searched queryset.
+
+¡ EJEMPLO POSTMAN!
+
+POST
+{
+  "category_id": 1,
+  "price_range": "20 - 39",
+  "search": "phone"
+}
+
+ -----------------------------------Pagination------------------
+
+ The configuration you provided for the pagination parameters is as follows:
+
+page_size = 2: This sets the number of items per page to 2. Each page will display a maximum of 2 products.
+
+page_query_param = 'p': This specifies the name of the query parameter that will be used to specify the
+page number in the URL. For example, if the page query parameter is set to 'p', you can specify the page number
+in the URL as ?p=2 to retrieve the second page.
+
+page_size_query_param = 'size': This specifies the name of the query parameter that will be used to specify
+the page size in the URL. For example, if the page size query parameter is set to 'size', you can specify the
+page size in the URL as ?size=10 to retrieve a page with 10 products per page.
+
+max_page_size = 10: This sets the maximum allowed value for the page size. If a page size larger than 10 is
+requested, it will be limited to 10.
+
+last_page_strings = ['end']: This specifies the string representation for the last page in the
+pagination response. In this case, the string representation for the last page will be 'end'.
+
+With a page_size of 2, you would need at least 3 products to have a second pagination page.
+The first page will display the first 2 products, and the second page will display the next 2 products.
+
+If you have fewer than 3 products, there will be no second pagination page because there are
+not enough products to fill it. The first page will show all available products, and subsequent pages
+will not exist.

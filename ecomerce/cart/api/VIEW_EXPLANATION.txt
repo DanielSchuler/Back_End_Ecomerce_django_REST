@@ -1,0 +1,342 @@
+Endpoint: /cart-items/
+Method: GET
+
+Description:
+This view retrieves a list of cart items for the authenticated user.
+
+GET Request:
+- Method: GET
+- Endpoint: /cart-items/
+- Response:
+    - Status code: 200 OK
+    - Body (JSON):
+        - cart: Array of serialized cart item objects
+
+Functionality:
+- get_queryset method:
+    - Retrieves the authenticated user from the request.
+    - Attempts to retrieve the cart object related to the user from the database.
+    - Returns a queryset of cart items filtered by the cart object.
+    - If the cart or user does not exist, returns an empty queryset.
+
+list method:
+    - Invoked when handling the GET request.
+    - Calls the get_queryset method to retrieve the queryset of cart items.
+    - Checks if the queryset is empty and returns an error response if so.
+    - Serializes the queryset of cart items.
+    - Returns the serialized cart items in the response.
+    - Query Parameters:
+
+Optional: search (string)
+    - Filters the cart items based on the provided search string. The search is performed on the
+      'name' field of the cart items.
+
+Optional: ordering (string)
+    - Orders the cart items based on the provided ordering parameter.
+      The ordering can be done by 'name' or 'price'.
+
+Example Request:
+    - GET /cart-items/?search=example&ordering=name
+
+Example Response:
+ Status code: 200 OK
+
+{
+    "cart": [
+        {
+            "id": 1,
+            "name": "Example Product",
+            "price": 10.99,
+            ...
+        },
+        {
+            "id": 2,
+            "name": "Another Example",
+            "price": 19.99,
+            ...
+        },
+        ...
+    ]
+}
+
+
+Error Responses:
+    - Status code: 404 Not Found
+        - Body (JSON):
+            - error: "No cart items found for the user"
+        - Returned when there are no cart items for the authenticated user.
+
+
+
+
+
+---------------------------- Get Total Cart Items
+
+View: Get Total Cart Items
+Description: This view retrieves the total number of items in the user's cart.
+
+HTTP Method: GET
+
+Authentication:
+- If the user is authenticated, the view fetches the cart associated with the user and returns the total number of items in the cart.
+- If the user is not authenticated, the view returns an empty cart response with a message indicating the need for authentication.
+
+URL: /cart/total-cart-items/
+
+Response:
+- If the user is authenticated and has a cart:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_items': <total_items>}
+    - total_items (integer): The total number of items in the user's cart.
+
+- If the user is authenticated but doesn't have a cart:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_items': 0}
+    - total_items (integer): 0 indicating an empty cart.
+
+- If the user is not authenticated:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_items': 0, 'message': 'Please authenticate to view cart items'}
+    - total_items (integer): 0 indicating an empty cart.
+    - message (string): A message indicating the need for authentication.
+
+---------------------------------------------AddItemView
+
+
+
+View: Add Item to Cart
+Description: This view allows adding a product to the user's cart.
+
+HTTP Method: POST
+
+Authentication: The user must be authenticated to add an item to the cart.
+
+URL: /cart/add-item/
+
+Request:
+- HTTP Method: POST
+- Content-Type: application/json
+- Request Body:
+  - product_id (integer, required): The ID of the product to add to the cart.
+
+Response:
+- If the item is added successfully:
+  - HTTP Status Code: 201 CREATED
+  - Response Body: {'cart': [list of cart items]}
+    - cart (list): A list of items in the cart.
+    - Each item in the list contains:
+      - id (integer): The ID of the cart item.
+      - count (integer): The quantity of the item in the cart.
+      - product (object): Details of the product.
+        - id (integer): The ID of the product.
+        - Other product attributes (e.g., name, price, etc.).
+
+- If the product ID is missing or not an integer:
+  - HTTP Status Code: 400 BAD REQUEST
+  - Response Body: {'error': 'Product ID must be an integer'}
+
+- If the product with the given ID does not exist:
+  - HTTP Status Code: 404 NOT FOUND
+  - Response Body: {'error': 'This product does not exist'}
+
+- If the item is already in the cart:
+  - HTTP Status Code: 409 CONFLICT
+  - Response Body: {'error': 'Item is already in cart'}
+
+- If the product is out of stock:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'error': 'Not enough of this item in stock'}
+
+- If there is a server error:
+  - HTTP Status Code: 500 INTERNAL SERVER ERROR
+  - Response Body: {'error': 'Something went wrong when adding item to cart'}
+
+Example Request using Postman:
+- HTTP Method: POST
+- URL: http://example.com/api/cart/add-item/
+- Request Body:
+  {
+    "product_id": 123
+  }
+  Replace `123` with the actual product ID.
+
+Example Response:
+- HTTP Status Code: 201 CREATED
+- Response Body:
+  {
+    "cart": [
+      {
+        "id": 1,
+        "count": 1,
+        "product": {
+          "id": 123,
+          "name": "Example Product",
+          "price": 9.99
+          // Other product attributes
+        }
+      }
+    ]
+  }
+
+
+----------------------------------------------CartSummaryView
+
+View: Cart Summary
+Description: This view provides a summary of the user's cart, including the total cost and the total compare cost.
+
+HTTP Method: GET
+
+Authentication:
+- If the user is not authenticated, the view returns an empty cart response with a message indicating the need for authentication.
+- If the user is authenticated, the view fetches the cart associated with the user and calculates the total cost and total compare cost based on the cart items.
+
+URL: /cart/cart-summary/
+
+Response:
+- If the user is not authenticated:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_cost': 0, 'total_compare_cost': 0, 'message': 'Please authenticate to view cart summary'}
+    - total_cost (float): The total cost of all items in the cart.
+    - total_compare_cost (float): The total compare cost of all items in the cart.
+    - message (string): A message indicating the need for authentication.
+
+- If the user is authenticated and has a cart with items:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_cost': <total_cost>, 'total_compare_cost': <total_compare_cost>}
+    - total_cost (float): The total cost of all items in the cart.
+    - total_compare_cost (float): The total compare cost of all items in the cart.
+
+- If the user is authenticated but has an empty cart:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'total_cost': 0, 'total_compare_cost': 0}
+    - total_cost (float): 0 indicating an empty cart.
+    - total_compare_cost (float): 0 indicating an empty cart.
+
+Example Request using Postman:
+- HTTP Method: GET
+- URL: http://example.com/api/cart/summary/
+  Replace `example.com` with your actual domain.
+
+Example Response:
+- HTTP Status Code: 200 OK
+- Response Body:
+  {
+    "total_cost": 59.99,
+    "total_compare_cost": 79.99
+  }
+
+
+------------------------------------------EmptyCartView
+
+
+View: Empty Cart
+Description: This view allows emptying the user's cart by removing all items.
+
+HTTP Method: DELETE
+
+Authentication: The user must be authenticated to empty the cart.
+
+URL: /cart/empty-cart/
+
+Response:
+- If the cart is already empty:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'success': 'Cart is already empty'}
+    - success (string): A message indicating that the cart is already empty.
+
+- If the cart exists and is successfully emptied:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'success': 'Cart emptied successfully'}
+    - success (string): A message indicating that the cart has been emptied successfully.
+
+- If the cart does not exist:
+  - HTTP Status Code: 404 NOT FOUND
+  - Response Body: {'error': 'Cart does not exist'}
+    - error (string): A message indicating that the cart does not exist.
+
+Example Request using Postman:
+- HTTP Method: DELETE
+- URL: http://example.com/api/cart/empty/
+  Replace `example.com` with your actual domain.
+
+Example Response:
+- If the cart is already empty:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'success': 'Cart is already empty'}
+
+- If the cart is successfully emptied:
+  - HTTP Status Code: 200 OK
+  - Response Body: {'success': 'Cart emptied successfully'}
+
+- If the cart does not exist:
+  - HTTP Status Code: 404 NOT FOUND
+  - Response Body: {'error': 'Cart does not exist'}
+
+
+----------------------------------------SynchCartView
+
+View: Synchronize Cart
+Description: This view allows synchronizing the user's cart by updating the cart items based on the provided cart items data.
+
+HTTP Method: PUT
+
+Authentication: The user must be authenticated to synchronize the cart.
+
+URL: /cart/sync/
+
+Request:
+- HTTP Method: PUT
+- Content-Type: application/json
+- Request Body:
+  - cart_items (array, optional): An array of cart items data.
+    - Each cart item object should include:
+      - product_id (integer, required): The ID of the product to add to the cart.
+      - Other attributes as needed.
+
+Response:
+- If the cart exists and is successfully synchronized:
+  - HTTP Status Code: 201 CREATED
+  - Response Body: {'success': 'Cart synchronized'}
+    - success (string): A message indicating that the cart has been successfully synchronized.
+
+- If the cart does not exist:
+  - HTTP Status Code: 404 NOT FOUND
+  - Response Body: {'error': 'Cart does not exist'}
+    - error (string): A message indicating that the cart does not exist.
+
+- If the provided cart_items data is invalid:
+  - HTTP Status Code: 400 BAD REQUEST
+  - Response Body: {'error': <error_details>}
+    - error_details (object): Details of the validation errors.
+
+Example Request using Postman:
+- HTTP Method: PUT
+- URL: http://example.com/api/cart/sync/
+  Replace `example.com` with your actual domain.
+- Request Body:
+  {
+    "cart_items": [
+      {
+        "product_id": 123,
+        // Other cart item attributes
+      },
+      {
+        "product_id": 456,
+        // Other cart item attributes
+      }
+    ]
+  }
+  Replace `123` and `456` with the actual product IDs and provide other necessary attributes as needed.
+
+Example Response:
+- If the cart is successfully synchronized:
+  - HTTP Status Code: 201 CREATED
+  - Response Body: {'success': 'Cart synchronized'}
+
+- If the cart does not exist:
+  - HTTP Status Code: 404 NOT FOUND
+  - Response Body: {'error': 'Cart does not exist'}
+
+- If the provided cart_items data is invalid:
+  - HTTP Status Code: 400 BAD REQUEST
+  - Response Body: {'error': <error_details>}

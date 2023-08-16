@@ -1,0 +1,26 @@
+The `ListOrderDetailView` view that inherits from `RetrieveUpdateDestroyAPIView` works as follows:
+
+- **GET Request**: When you send a GET request to the view, it retrieves the order detail based on the provided transaction ID. It uses the `get_object()` method to fetch the specific order from the database based on the transaction ID and user. The retrieved order is then serialized using the `OrderSerializer` specified in the `serializer_class` attribute and returned as the response.
+
+- **PUT/PATCH Requests**: When you send a PUT or PATCH request to the view, it updates the order detail. The request data is deserialized using the `OrderSerializer`, and the deserialized data is used to update the corresponding order instance. The updated order is then serialized again and returned as the response.
+
+- **DELETE Request**: When you send a DELETE request to the view, it deletes the order from the database based on the provided transaction ID. The order is fetched using the `get_object()` method, and if found, it is deleted from the database.
+
+To use this view, you need to configure your URL routing to associate the appropriate URL pattern with the `ListOrderDetailView` view. Here's an example URL configuration in your `urls.py` file:
+
+```python
+from django.urls import path
+from .views import ListOrderDetailView
+
+urlpatterns = [
+    path('orders/<str:transactionId>/', ListOrderDetailView.as_view(), name='order-detail'),
+]
+```
+
+In this example, the `ListOrderDetailView` is associated with the URL pattern `orders/<str:transactionId>/`. When a request is made to this URL pattern with a specific `transactionId`, it will be handled by the `ListOrderDetailView` view.
+
+Make sure to include this URL configuration in your project's main `urls.py` file or include it in the appropriate URL configuration for your app.
+
+Once the URL routing is set up, you can make requests to the corresponding URLs using tools like cURL, Postman, or any other HTTP client library to interact with the view and perform the desired operations (GET, PUT, PATCH, DELETE) on the order detail.
+
+I hope this clarifies the usage of the `ListOrderDetailView` view. Let me know if you have any further questions!
