@@ -1,0 +1,51 @@
+ 
+# Ignore local settings
+local_settings.py
+
+# Ignore database files
+db.sqlite3
+
+# Ignore Python bytecode files
+__pycache__/
+
+# Ignore environment folder
+environment/
+.env
+# Ignore any compiled Python files
+*.pyc
+
+# Ignore the virtual environment folder (if you're using virtualenv)
+venv/
+
+# Ignore any logs
+*.log
+
+# Ignore secret key file (if you have one)
+secret_key.txt
+
+# Ignore static and media files (you should use a CDN or file storage service in production)
+/staticfiles/
+/media/
+
+# Ignore database backup files (if any)
+*.bak
+
+# Ignore generated documentation
+/_build/
+/doc/
+
+# Ignore IDE-specific files (e.g., if you're using PyCharm)
+.idea/
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore any files inside the "pasos postman" folder
+/pasos postman/
+
+# Ignore any files inside the "__pycache__" folder (Python bytecode cache)
+/__pycache__/
+# photo folder
+/photo/
+
