@@ -47,5 +47,5 @@ Thumbs.db
 # Ignore any files inside the "__pycache__" folder (Python bytecode cache)
 /__pycache__/
 # photo folder
-/photo/
+/photos/
 
