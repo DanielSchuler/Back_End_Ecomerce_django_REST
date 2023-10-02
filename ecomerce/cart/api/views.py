@@ -10,7 +10,8 @@ from product.models import Product
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum, F
 
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 
 
 
@@ -88,8 +89,14 @@ class GetTotalCartItemsView(APIView):
                 {'total_items': 0, 'message': 'Please authenticate to view cart items'},
                 status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def test_view(request):
+    return Response({'message': 'Authenticated'})
+
 
 class AddItemView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         user = self.request.user
         data = self.request.data
@@ -144,7 +151,7 @@ class AddItemView(APIView):
                     status=status.HTTP_200_OK)
         except Exception:
             return Response(
-                {'error': 'Something went wrong when adding item to cart'},
+                {'error': f'Something went wrong when adding item to cart user:{user}, data:{data}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 '''

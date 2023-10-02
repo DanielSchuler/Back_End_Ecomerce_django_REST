@@ -8,3 +8,11 @@ class ListCategoriesView(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = CategorySerializer
     queryset = Category.objects.filter(parent__isnull=True)
+
+class ListTopLevelCategoriesView(generics.ListAPIView):
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = CategorySerializer
+    queryset = Category.objects.filter(parent__isnull=True)
+
+    def get_queryset(self):
+        return self.queryset

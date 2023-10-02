@@ -12,73 +12,49 @@ from user_app.models import UserAccount
 from django.contrib import auth
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    #cambie user por account
+    @classmethod
+    def get_token(cls, account):
+        token = super().get_token(account)
+        token['username'] = account.username
+        token['email'] = account.email
+        token['first_name'] = account.first_name
+
+        return token
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
 
 # como django en su flujo, cuando un usuario hace una peticion esta es pasada a los views
 # en primera instancia, crearemos una funcion que pueda recibir la peticion y llamar
 # al serializer para validar los datos de la peticion
 @api_view(['POST', ])
 def registration_view(request):
-    if request.method == 'POST':
-        serializer = RegistrationSerializer(data=request.data)
-        data = {}
-
-        if serializer.is_valid():
-            account = serializer.save()
-
-            data["response"] = 'El usuario fue registrado exitosamente.'
-            data['username'] = account.username
-            data['email'] = account.email
-            data['first_name'] = account.first_name
-            data['last_name'] = account.last_name
-            data['phone_number'] = account.phone_number
-            # obtener token y asignarlo a un property token
-            # token=Token.objects.get(user=account).key
-            # data['token']=token
-
-            # se generara el token con el refresh token
-
-            refresh = RefreshToken.for_user(account)
-            data['token'] = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token)
-            }
-
-            # return Response(serializer.data, status = status.HTTP_201_CREATED)
-        else:
-            data = serializer.errors
-
-        return Response(data)
-
+   pass
 
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@permission_classes([IsAuthenticated])
 def session_view(request):
-    if request.method == 'GET':
-        user = request.user
-        account = UserAccount.objects.get(email=user)
-        data = {}
-        if account is not None:
-            data['response'] = 'El usuario esta en sesion'
-            data['username'] = account.username
-            data['email'] = account.email
-            data['first_name'] = account.first_name
-            data['last_name'] = account.last_name
-            refresh = RefreshToken.for_user(account)
-            data['token'] = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token)
-            }
-            return Response(data)
-        else:
-            data['error'] = 'El usuario no existe'
-            return Response(data, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    user = request.user  # This gives you the authenticated user
+    data = {
+        'status': '200',
+        'message': 'Bienvenido',
+        'user_id': user.id,
+        'username': user.username,
+        'email': user.email,
+        # Add other user information you want to include in the session response
+    }
+    return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['POST', ])
 def logout_view(request):
-    if request.method == 'POST':
-        request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+   pass
 
 
 @api_view(['POST'])

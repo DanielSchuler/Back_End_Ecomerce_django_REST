@@ -62,7 +62,8 @@ ECOMMERCE_APPS=['category','product','cart','order','wishlist',]
 
 THIRD_PARTY_APPS=[
     'rest_framework',
-    'rest_framework.authtoken',
+    #'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'corsheaders',
 ]
@@ -202,15 +203,27 @@ REST_FRAMEWORK = {
 }
 
 
+
+
+
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT', ),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10080),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESFH_TOKENS':True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_TOKEN_CLASSES': (
-        'rest_framework_simplejwt.tokens.AccessToken',
-    )
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
+
+    "ALGORITHM": "HS256",
+
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+
 }
 '''
 try:
